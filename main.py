@@ -15,7 +15,9 @@ import sys
 import argparse
 import numpy as np
 
-os.environ["QWYTHOS_API_KEY"] = "wsh101007"
+os.environ.setdefault("QWYTHOS_API_KEY", "your-api-key")
+QWYTHOS_HOME = os.environ.get("QWYTHOS_HOME", "/root/qwythos_engine")
+sys.path.insert(0, QWYTHOS_HOME)
 
 from engine.model import QwythosModel
 from api.server import create_app
@@ -25,7 +27,7 @@ import uvicorn
 def load_model():
     """Load Qwythos-9B model weights."""
     model_path = os.environ.get(
-        "QWYTHOS_MODEL_PATH",
+        "QWYTHOS_WEIGHT_PATH",
         "/root/models/Qwythos-9B-Claude-Mythos-5-1M")
     print(f"[Main] Loading model from {model_path}")
     model = QwythosModel(model_path, num_chips=4)

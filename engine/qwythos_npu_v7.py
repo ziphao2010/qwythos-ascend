@@ -5,8 +5,10 @@ Only changes: upload weights at init, use device switching in run_layer.
 import os, time, json, ctypes, numpy as np
 from ctypes import c_void_p, c_size_t, c_int, c_uint32, c_char_p, byref, CDLL, POINTER
 
-MODEL_DIR = "/root/qwythos_engine/om_models"
-WEIGHT_PATH = "/root/models/Qwythos-9B-Claude-Mythos-5-1M"
+MODEL_DIR = os.environ.get("QWYTHOS_MODEL_DIR", "/root/qwythos_engine/om_models")
+WEIGHT_PATH = os.environ.get("QWYTHOS_WEIGHT_PATH", "/root/models/Qwythos-9B-Claude-Mythos-5-1M")
+QWYTHOS_HOME = os.environ.get("QWYTHOS_HOME", "/root/qwythos_engine")
+H, NH, NKV, HD, IM, VS = 4096, 16, 4, 256, 12288, 248320
 H, NH, NKV, HD, IM, VS = 4096, 16, 4, 256, 12288, 248320
 SCALE = HD ** -0.5
 
@@ -72,7 +74,7 @@ class QNPU7:
     def __init__(self):
         t0=time.time()
         print("Loading...",end=" ",flush=True)
-        import sys;sys.path.insert(0,"/root/qwythos_engine")
+        import sys;sys.path.insert(0,QWYTHOS_HOME)
         from engine.weights import WeightLoader
         wl=WeightLoader(WEIGHT_PATH);cw=wl.load_all()
         self.dev=[ACL(i) for i in range(4)]

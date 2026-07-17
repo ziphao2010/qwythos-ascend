@@ -28,27 +28,38 @@
 - 驱动 24.1.1.3
 - Python 3.10+
 
-### 启动服务器
+### 安装
 
 ```bash
+# 1. 配置环境变量
+export QWYTHOS_HOME=/path/to/qwythos-ascend
+export QWYTHOS_WEIGHT_PATH=/path/to/model/weights
+export QWYTHOS_MODEL_DIR=/path/to/om_models
 export LD_LIBRARY_PATH=/usr/local/Ascend/ascend-toolkit/7.0.0/lib64:/usr/local/Ascend/driver/lib64
-cd /root/qwythos_engine
-python3 npu_server.py
+
+# 2. 安装依赖
+pip install -r requirements.txt
+
+# 3. 编译 ONNX 算子（可选，已有预编译 .om 模型）
+python scripts/create_onnx.py
+
+# 4. 启动服务器
+python npu_server.py
 ```
 
 ### 调用 API
 
 ```bash
 # 健康检查
-curl http://192.168.1.199:8000/health
+curl http://your-server-ip:8000/health
 
 # 模型列表
-curl http://192.168.1.199:8000/v1/models \
-  -H "Authorization: Bearer wsh101007"
+curl http://your-server-ip:8000/v1/models \
+  -H "Authorization: Bearer your-api-key"
 
 # 对话
-curl -X POST http://192.168.1.199:8000/v1/chat/completions \
-  -H "Authorization: Bearer wsh101007" \
+curl -X POST http://your-server-ip:8000/v1/chat/completions \
+  -H "Authorization: Bearer your-api-key" \
   -H "Content-Type: application/json" \
   -d '{
     "model": "qwythos-9b",
@@ -56,6 +67,16 @@ curl -X POST http://192.168.1.199:8000/v1/chat/completions \
     "max_tokens": 32
   }'
 ```
+
+### 环境变量
+
+| 变量 | 默认值 | 说明 |
+|------|--------|------|
+| `QWYTHOS_HOME` | `/root/qwythos_engine` | 项目根目录 |
+| `QWYTHOS_WEIGHT_PATH` | `/root/models/...` | 模型权重路径 |
+| `QWYTHOS_MODEL_DIR` | `$QWYTHOS_HOME/om_models` | 编译后 .om 模型目录 |
+| `QWYTHOS_API_KEY` | `your-api-key` | API 认证密钥 |
+| `SOC_VERSION` | `Ascend310` | 芯片型号 |
 
 ## 🏗️ 项目结构
 
@@ -145,6 +166,26 @@ python3 create_onnx_matmul.py
 atc --model=model.onnx --framework=5 \
     --output=model --soc_version=Ascend310 \
     --input_shape="A:1,4096;B:4096,4096"
+```
+
+### 编写 TBE 自定义算子
+
+参考 `ops/tik_matmul_fp32.py`，使用 `te`/`tik` DSL 编写：
+```python
+from te import tik
+tik_inst = tik.Tik()
+# 定义 GM 张量
+# 用 Vector Unit / Cube Unit
+tik_inst.BuildCCE(kernel_name="my_kernel", inputs=..., outputs=...)
+```
+
+### 编译 C 运行时
+
+```bash
+gcc -shared -fPIC -o libqwythos_npu.so qwythos_npu_lib.c \
+    -I/usr/local/Ascend/ascend-toolkit/latest/include \
+    -L/usr/local/Ascend/ascend-toolkit/latest/lib64 \
+    -lascendcl -Wl,-rpath,.../lib64
 ```
 
 ## 📝 License

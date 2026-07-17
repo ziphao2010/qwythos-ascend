@@ -7,8 +7,13 @@ from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 from typing import List, Optional, Union, Dict, Any
 
-sys.path.insert(0, "/root/qwythos_engine")
-from engine.qwythos_npu_v5 import QNPU, H, MODEL_DIR, WEIGHT_PATH
+# Configuration
+QWYTHOS_HOME = os.environ.get("QWYTHOS_HOME", "/root/qwythos_engine")
+QWYTHOS_API_KEY = os.environ.get("QWYTHOS_API_KEY", "your-api-key")
+
+sys.path.insert(0, QWYTHOS_HOME)
+from engine.qwythos_npu_v5 import QNPU, H
+WEIGHT_PATH = os.environ.get("QWYTHOS_WEIGHT_PATH", "/root/models/Qwythos-9B-Claude-Mythos-5-1M")
 VS = 248320  # vocab size
 
 # === API Models ===
@@ -43,7 +48,7 @@ def get_engine():
 # === FastAPI ===
 app = FastAPI(title="Qwythos-9B API")
 
-api_key = "wsh101007"
+api_key = "your-api-key"
 
 async def verify_auth(req: Request):
     auth = req.headers.get("Authorization", "")
@@ -151,7 +156,7 @@ async def completions(body: CompReq, req: Request):
 
 # === Main ===
 if __name__ == "__main__":
-    import os; os.environ["QWYTHOS_API_KEY"] = "wsh101007"
+    import os; os.environ["QWYTHOS_API_KEY"] = "your-api-key"
     print("Starting Qwythos-9B NPU Server...")
     q = get_engine()
     print(f"Loaded: {len(q.lt)} layers on Ascend 310 NPU")

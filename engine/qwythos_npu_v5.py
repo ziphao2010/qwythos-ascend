@@ -2,9 +2,11 @@
 import os, time, json, ctypes, numpy as np
 from ctypes import c_void_p, c_size_t, c_int, c_uint32, c_char_p, byref, CDLL, POINTER
 
-MODEL_DIR = "/root/qwythos_engine/om_models"
-WEIGHT_PATH = "/root/models/Qwythos-9B-Claude-Mythos-5-1M"
+MODEL_DIR = os.environ.get("QWYTHOS_MODEL_DIR", "/root/qwythos_engine/om_models")
+WEIGHT_PATH = os.environ.get("QWYTHOS_WEIGHT_PATH", "/root/models/Qwythos-9B-Claude-Mythos-5-1M")
+QWYTHOS_HOME = os.environ.get("QWYTHOS_HOME", "/root/qwythos_engine")
 H, NH, NKV, HD, IM = 4096, 16, 4, 256, 12288
+SCALE = HD ** -0.5
 SCALE = HD ** -0.5
 
 # Weight sizes: input_bytes, weight_bytes for each model
@@ -93,7 +95,7 @@ class QNPU:
     def __init__(self):
         print("Loading weights...", end=" ", flush=True)
         t0 = time.time()
-        import sys; sys.path.insert(0, "/root/qwythos_engine")
+        import sys; sys.path.insert(0, QWYTHOS_HOME)
         from engine.weights import WeightLoader
         self.wl = WeightLoader(WEIGHT_PATH); self.wl.load_all()
         self.a = ACL()
