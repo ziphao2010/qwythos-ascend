@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+*.o
+*.log
+kernel_meta/
+env/
+venv/
+.venv/
+*.swp
+.DS_Store
+.idea/
+*.log
+/thirty_part
+/atc.log
+/profiling

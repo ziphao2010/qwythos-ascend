@@ -1,0 +1,17 @@
+# Qwythos-Ascend - Dependencies
+# Core
+numpy>=1.24
+# API
+fastapi>=0.100
+uvicorn>=0.22
+pydantic>=2.0
+sse-starlette>=1.0
+# Tokenization
+transformers>=4.35
+tokenizers>=0.15
+sentencepiece>=0.1.99
+# Weight loading
+safetensors>=0.4
+torch>=2.0
+# ONNX model creation
+onnx>=1.14
